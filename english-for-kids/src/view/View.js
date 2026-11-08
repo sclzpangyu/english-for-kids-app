@@ -3,6 +3,8 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable camelcase */
 import eventMixin from '../mixins/eventMixin';
+import assetUrl from '../assetUrl';
+import { unlockAudio } from '../audio';
 
 
 class View {
@@ -24,6 +26,16 @@ class View {
 
 		this.switcher = document.querySelector('input');
 		this.overlay = document.querySelector('.overlay');
+
+		this.armedCards = new WeakSet();
+		this.lastTouchAt = 0;
+		document.addEventListener('pointerdown', (e) => {
+			if (e.pointerType === 'touch' || e.pointerType === 'pen') {
+				this.lastTouchAt = Date.now();
+			}
+			unlockAudio();
+			this.flipReset(e);
+		});
 
 		this.hamburger.addEventListener('click', this.clickHamburgerHandler.bind(this));
 		this.navigation.addEventListener('click', this.clickLinksHandler.bind(this));
@@ -54,7 +66,9 @@ class View {
 
 	clickCardsHandler(e) {
 		const card = e.target.closest('.card');
+		if (!card) return;
 		const card_id = card.getAttribute('data-id');
+		if (!card_id) return;
 		this.emit('card_clicked', card_id);
 		this.closeMobileMenu();
 	}
@@ -102,8 +116,17 @@ class View {
 		el.classList.add('active-link');
 	}
 
-	leaveCardHandler(e) {
-		e.target.classList.remove('is-flipped');
+	// Desktop: mouseleave puts the translation away. Touch: a later tap outside does the same,
+	// because iPad Safari does not emit a reliable mouseleave after a tap.
+	flipReset(e) {
+		const flipped = this.cardsContainer.querySelectorAll('.card.is-flipped');
+		flipped.forEach((card) => {
+			if (e.type === 'mouseleave') {
+				if (e.currentTarget === card) card.classList.remove('is-flipped');
+				return;
+			}
+			if (!card.contains(e.target)) card.classList.remove('is-flipped');
+		});
 	}
 
 	clickSwitcherHandler() {
@@ -133,11 +156,15 @@ class View {
 
 	flipCard(id) {
 		const card = this.cardsContainer.querySelector(`[data-id="${id}"]`);
+		if (!card) return;
 		card.classList.toggle('is-flipped');
-
-		setTimeout((() => {
-			card.addEventListener('mouseleave', this.leaveCardHandler.bind(this));
-		}), 800);
+		const fromTouch = Date.now() - this.lastTouchAt < 1000;
+		if (card.classList.contains('is-flipped') && !fromTouch && !this.armedCards.has(card)) {
+			this.armedCards.add(card);
+			setTimeout(() => {
+				card.addEventListener('mouseleave', this.flipReset.bind(this));
+			}, 800);
+		}
 	}
 
 	playModeView() {
@@ -173,9 +200,9 @@ class View {
 		roundArray.forEach((round) => {
 			const star = document.createElement('img');
 			if (round) {
-				star.setAttribute('src', '/assets/img/star-win.svg');
+				star.setAttribute('src', assetUrl('/assets/img/star-win.svg'));
 			} else {
-				star.setAttribute('src', '/assets/img/star.svg');
+				star.setAttribute('src', assetUrl('/assets/img/star.svg'));
 			}
 			this.scoreContainer.appendChild(star);
 		});
@@ -198,11 +225,11 @@ class View {
 		cardFacaBack.classList.add('card__face', 'card__face--back', 'image-link');
 
 		const image = document.createElement('img');
-		image.setAttribute('src', img);
+		image.setAttribute('src', assetUrl(img));
 		image.setAttribute('alt', word);
 
 		const imageBack = document.createElement('img');
-		imageBack.setAttribute('src', img);
+		imageBack.setAttribute('src', assetUrl(img));
 		imageBack.setAttribute('alt', word);
 
 		const title = document.createElement('span');
@@ -210,7 +237,7 @@ class View {
 
 		const arr = document.createElement('img');
 		arr.classList.add('arrow');
-		arr.setAttribute('src', '../assets/img/rotate.svg');
+		arr.setAttribute('src', assetUrl('../assets/img/rotate.svg'));
 
 		const titleBack = document.createElement('span');
 		titleBack.textContent = translation;

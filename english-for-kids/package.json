@@ -6,19 +6,20 @@
   "scripts": {
     "dev": "webpack-dev-server",
     "build": "webpack",
+    "build:pages": "npx --yes esbuild@0.24.2 src/index.js --bundle --format=iife --target=es2018 --outfile=dist/script.js",
     "lint": "eslint ./**/*.js",
     "lint:fix": "eslint ./**/*.js --fix"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Gabriellji/english-for-kids.git"
+    "url": "git+https://github.com/sclzpangyu/english-for-kids-app.git"
   },
   "author": "gabriellji",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Gabriellji/english-for-kids/issues"
+    "url": "https://github.com/sclzpangyu/english-for-kids-app/issues"
   },
-  "homepage": "https://github.com/Gabriellji/english-for-kids#readme",
+  "homepage": "https://sclzpangyu.github.io/english-for-kids-app/",
   "devDependencies": {
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.9.0",
