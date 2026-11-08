@@ -3,6 +3,17 @@
 # English for kids 
 an simple app for kids to learn english words with only used HTML, CSS, and Vanilla JavaScript.
 
+### This fork
+Playable static copy for GitHub Pages and an 11-inch iPad Air (Safari), aimed at `https://sclzpangyu.github.io/english-for-kids-app/` after Pages is enabled from this repo.
+
+Code license is ISC, copyright 2021 gabriellji (see `LICENSE`). The word list, picture cards, and local MP3 files are unchanged from the original project. Filenames that name toppng.com and kisspng keep those source marks. Picture and audio files are not separately relicensed.
+
+The Pages workflow uploads `english-for-kids/dist` as-is. It does not run the original Webpack 4 toolchain. After changing `english-for-kids/src`, refresh the bundle with:
+
+```bash
+cd english-for-kids && npm run build:pages
+```
+
 ### Description of the task ([RSSchool](https://rs.school))
 https://github.com/rolling-scopes-school/tasks/blob/master/tasks/rslang/english-for-kids.md
 

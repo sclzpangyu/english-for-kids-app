@@ -1,0 +1,58 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify static dist (no legacy webpack install)
+        run: |
+          test -f english-for-kids/dist/index.html
+          test -f english-for-kids/dist/script.js
+          test -f english-for-kids/dist/css/app.css
+          test -f english-for-kids/dist/LICENSE.txt
+          test -d english-for-kids/dist/assets/audio
+          test -d english-for-kids/dist/assets/img
+          grep -q baseURI english-for-kids/dist/script.js
+          grep -q 'css/app.css' english-for-kids/dist/index.html
+          test "$(find english-for-kids/dist/assets/audio -name '*.mp3' | wc -l)" -ge 60
+
+  deploy:
+    needs: check
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload dist
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: english-for-kids/dist
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

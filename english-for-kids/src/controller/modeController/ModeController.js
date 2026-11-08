@@ -1,5 +1,6 @@
 /* eslint-disable class-methods-use-this */
 import eventMixin from '../../mixins/eventMixin';
+import { playAsset } from '../../audio';
 
 class ModeController {
 	constructor(view, model) {
@@ -13,10 +14,7 @@ class ModeController {
 	}
 
 	playWord(src) {
-		const audio = new Audio();
-		audio.preload = 'auto';
-		audio.src = src;
-		audio.play();
+		playAsset(src);
 	}
 
 	destruct() {
